@@ -120,23 +120,15 @@ class SyncProcessor {
 						variables,
 					});
 				} catch (error) {
-					// If the error is unauthorized, filter out unauthorized items and return accessible items
-					const unauthorized = (error.errors as [any]).some(
-						err => err.errorType === 'Unauthorized'
+					const result = error;
+					result.data[opName].items = result.data[opName].items.filter(
+						item => item !== null
 					);
-					if (unauthorized) {
-						const result = error;
-						result.data[opName].items = result.data[opName].items.filter(
-							item => item !== null
-						);
-						logger.warn(
-							'queryError',
-							'User is unauthorized, some items could not be returned.'
-						);
-						return result;
-					} else {
-						throw error;
-					}
+					logger.warn(
+						'queryError',
+						'There were errors returned, some items could not be returned.'
+					);
+					return result;
 				}
 			},
 			[query, variables]
